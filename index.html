@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Home — live sensor dashboard</title>
+  <meta name="description" content="Live dashboard for building temperature, humidity and area motion sensors." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       SETUP SCREEN
+       Shown the first time the dashboard is opened, and whenever
+       the last building is deleted. Replaced by the dashboard once
+       a building exists.
+       ============================================================ -->
+  <main class="setup" id="setup-screen" hidden>
+    <div class="setup__card">
+      <header class="setup__head">
+        <div class="mark" aria-hidden="true"></div>
+        <h1 class="setup__title">Set up your first building</h1>
+        <p class="setup__lede">
+          The dashboard watches one building at a time. Tell it what this building
+          is called and which area the first motion sensor is watching.
+        </p>
+      </header>
+
+      <ol class="steps" id="setup-steps">
+        <li class="steps__item is-current" data-step="1"><span class="steps__num">1</span> Name</li>
+        <li class="steps__item" data-step="2"><span class="steps__num">2</span> Category</li>
+        <li class="steps__item" data-step="3"><span class="steps__num">3</span> First area</li>
+      </ol>
+
+      <form id="setup-form" novalidate>
+
+        <!-- Step 1 -->
+        <section class="setup__step is-active" data-step="1">
+          <label class="field">
+            <span class="field__label">What is the name of this building?</span>
+            <input class="input" type="text" id="setup-name" name="name"
+                   placeholder="Joshua's House" autocomplete="off" maxlength="60" required />
+            <span class="field__help">This becomes the display name across the dashboard.</span>
+          </label>
+        </section>
+
+        <!-- Step 2 -->
+        <section class="setup__step" data-step="2">
+          <fieldset class="field">
+            <legend class="field__label">What is this building used for?</legend>
+            <div class="chips" id="setup-categories" role="group" aria-label="Building categories"></div>
+            <div class="inline-add">
+              <input class="input input--sm" type="text" id="setup-category-new"
+                     placeholder="Add your own, e.g. Cottage" autocomplete="off" maxlength="24" />
+              <button class="btn btn--quiet" type="button" id="setup-category-add">Add category</button>
+            </div>
+            <span class="field__help">Pick as many as fit. You can change these later.</span>
+          </fieldset>
+        </section>
+
+        <!-- Step 3 -->
+        <section class="setup__step" data-step="3">
+          <label class="field">
+            <span class="field__label">Which area is the first motion sensor watching?</span>
+            <input class="input" type="text" id="setup-area" name="area"
+                   placeholder="Living Room" autocomplete="off" maxlength="40" required />
+            <span class="field__help">Name the real area, not the hardware. You can add more areas once the dashboard opens.</span>
+          </label>
+        </section>
+
+        <p class="form-error" id="setup-error" role="alert" hidden></p>
+
+        <footer class="setup__actions">
+          <button class="btn btn--quiet" type="button" id="setup-back" hidden>Back</button>
+          <button class="btn btn--primary" type="button" id="setup-next">Continue</button>
+        </footer>
+      </form>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       DASHBOARD
+       ============================================================ -->
+  <div class="app" id="app-shell" hidden>
+
+    <header class="topbar">
+      <div class="topbar__brand">
+        <div class="mark" aria-hidden="true"></div>
+        <span class="topbar__name">Smart Home</span>
+      </div>
+
+      <div class="topbar__right">
+        <!-- Connection state of the data source (demo simulator, MQTT or WebSocket) -->
+        <span class="link-state" id="link-state" data-state="idle">
+          <span class="link-state__dot" aria-hidden="true"></span>
+          <span class="link-state__text" id="link-state-text">Starting</span>
+        </span>
+        <button class="btn btn--quiet" type="button" id="open-settings">Settings</button>
+      </div>
+    </header>
+
+    <!-- Building navigation. Sidebar on wide screens, scrolling rail on narrow ones. -->
+    <nav class="rail" id="rail" aria-label="Buildings">
+      <h2 class="rail__title">Buildings</h2>
+      <ul class="rail__list" id="rail-list"></ul>
+      <button class="btn btn--outline rail__add" type="button" id="add-building">Add building</button>
+    </nav>
+
+    <main class="stage" id="stage">
+      <div class="stage__head">
+        <div>
+          <h1 class="stage__title" id="building-name">—</h1>
+          <div class="tags" id="building-tags"></div>
+        </div>
+        <div class="stage__tools">
+          <button class="btn btn--quiet" type="button" id="edit-building">Edit building</button>
+          <button class="btn btn--danger-quiet" type="button" id="delete-building">Delete</button>
+        </div>
+      </div>
+
+      <!-- Whole-building environment: one enclosure, two readouts, deliberately
+           joined so it reads as a single building-level instrument. -->
+      <section class="env" aria-labelledby="env-heading">
+        <div class="env__bar">
+          <h2 class="env__heading" id="env-heading">Whole building</h2>
+          <p class="env__note">These two readings describe the building as a whole, not one room.</p>
+        </div>
+
+        <div class="env__grid">
+          <article class="readout" data-sensor="temperature">
+            <div class="readout__top">
+              <h3 class="readout__label">Temperature</h3>
+              <span class="state" data-state="waiting">
+                <span class="state__dot" aria-hidden="true"></span>
+                <span class="state__text">Waiting</span>
+              </span>
+            </div>
+            <p class="readout__value" aria-live="polite">
+              <span class="readout__number">--</span><span class="readout__unit">°C</span>
+            </p>
+            <dl class="readout__meta">
+              <div><dt>Updated</dt><dd class="readout__age">no readings yet</dd></div>
+              <div><dt>Source</dt><dd class="readout__source">—</dd></div>
+            </dl>
+          </article>
+
+          <article class="readout" data-sensor="humidity">
+            <div class="readout__top">
+              <h3 class="readout__label">Humidity</h3>
+              <span class="state" data-state="waiting">
+                <span class="state__dot" aria-hidden="true"></span>
+                <span class="state__text">Waiting</span>
+              </span>
+            </div>
+            <p class="readout__value" aria-live="polite">
+              <span class="readout__number">--</span><span class="readout__unit">%</span>
+            </p>
+            <dl class="readout__meta">
+              <div><dt>Updated</dt><dd class="readout__age">no readings yet</dd></div>
+              <div><dt>Source</dt><dd class="readout__source">—</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <!-- Area-specific motion sensors -->
+      <section class="areas" aria-labelledby="areas-heading">
+        <div class="areas__head">
+          <div>
+            <h2 class="areas__heading" id="areas-heading">Areas</h2>
+            <p class="areas__note">Each sensor watches one part of the building.</p>
+          </div>
+          <button class="btn btn--outline" type="button" id="add-area">Add motion sensor</button>
+        </div>
+
+        <div class="areas__grid" id="areas-grid"></div>
+
+        <p class="empty" id="areas-empty" hidden>
+          No areas are being watched. Add the first area you want a motion sensor for.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Dialog host. Content is built in js/app.js. -->
+  <div class="modal" id="modal-root" hidden>
+    <div class="modal__scrim" data-close="true"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 class="modal__title" id="modal-title"></h2>
+      <p class="modal__lede" id="modal-lede"></p>
+      <form class="modal__body" id="modal-form" novalidate></form>
+      <p class="form-error" id="modal-error" role="alert" hidden></p>
+      <footer class="modal__actions">
+        <button class="btn btn--quiet" type="button" data-close="true">Cancel</button>
+        <button class="btn btn--primary" type="button" id="modal-submit">Save</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- MQTT over WebSockets. Only used when the data source is set to "mqtt".
+       The dashboard checks whether this loaded before trying to use it, so the
+       demo simulator still works with no internet connection. -->
+  <script src="https://unpkg.com/mqtt@5.7.0/dist/mqtt.min.js"></script>
+
+  <!-- Load order matters: each file adds itself to the shared SHD namespace. -->
+  <script src="js/config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/sensors.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
