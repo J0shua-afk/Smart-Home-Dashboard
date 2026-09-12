@@ -18,18 +18,19 @@
   <main class="setup" id="setup-screen" hidden>
     <div class="setup__card">
       <header class="setup__head">
-        <div class="mark" aria-hidden="true"></div>
+        <!-- EDIT HERE: your initials. The same monogram appears in the top bar. -->
+        <div class="mark" aria-hidden="true">JL</div>
         <h1 class="setup__title">Set up your first building</h1>
         <p class="setup__lede">
-          The dashboard watches one building at a time. Tell it what this building
-          is called and which area the first motion sensor is watching.
+          The dashboard watches one building at a time. Give it a name, and add a
+          motion sensor now or later — whichever suits you.
         </p>
       </header>
 
       <ol class="steps" id="setup-steps">
         <li class="steps__item is-current" data-step="1"><span class="steps__num">1</span> Name</li>
         <li class="steps__item" data-step="2"><span class="steps__num">2</span> Category</li>
-        <li class="steps__item" data-step="3"><span class="steps__num">3</span> First area</li>
+        <li class="steps__item" data-step="3"><span class="steps__num">3</span> Motion sensor</li>
       </ol>
 
       <form id="setup-form" novalidate>
@@ -63,8 +64,9 @@
           <label class="field">
             <span class="field__label">Which area is the first motion sensor watching?</span>
             <input class="input" type="text" id="setup-area" name="area"
-                   placeholder="Living Room" autocomplete="off" maxlength="40" required />
-            <span class="field__help">Name the real area, not the hardware. You can add more areas once the dashboard opens.</span>
+                   placeholder="Living Room" autocomplete="off" maxlength="40" />
+            <span class="field__help">Optional. Name the real area, not the hardware — or skip this and add
+              areas from the dashboard later. Temperature and humidity work either way.</span>
           </label>
         </section>
 
@@ -72,6 +74,7 @@
 
         <footer class="setup__actions">
           <button class="btn btn--quiet" type="button" id="setup-back" hidden>Back</button>
+          <button class="btn btn--outline" type="button" id="setup-skip" hidden>Skip for now</button>
           <button class="btn btn--primary" type="button" id="setup-next">Continue</button>
         </footer>
       </form>
@@ -85,7 +88,7 @@
 
     <header class="topbar">
       <div class="topbar__brand">
-        <div class="mark" aria-hidden="true"></div>
+        <div class="mark" aria-hidden="true">JL</div>
         <span class="topbar__name">Smart Home</span>
       </div>
 
@@ -176,7 +179,8 @@
         <div class="areas__grid" id="areas-grid"></div>
 
         <p class="empty" id="areas-empty" hidden>
-          No areas are being watched. Add the first area you want a motion sensor for.
+          No motion sensors yet. Temperature and humidity already cover the whole building —
+          add an area when you want motion tracking too.
         </p>
       </section>
     </main>
