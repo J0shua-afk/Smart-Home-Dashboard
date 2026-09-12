@@ -4,8 +4,8 @@ A live dashboard for the sensors in a building: one temperature reading and one
 humidity reading for the building as a whole, plus a motion sensor for each area
 you care about.
 
-The readings come from a small MQTT sensor network. Publishers — Python scripts
-simulating sensors, or real hardware later — send values to an MQTT broker, and
+The readings come from a small MQTT sensor network. Python scripts
+simulating sensors, or real hardware later send values to an MQTT broker, and
 this dashboard subscribes to that broker and draws what arrives. Nothing is
 polled and nothing is refreshed by hand: a value on screen changes the moment a
 message lands.
