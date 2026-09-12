@@ -23,6 +23,10 @@
   --signal-soft: #FCF1EB;
   --signal-line: #E6B79E;
 
+  /* EDIT HERE: the monogram letters. This is the same red as the motion
+     signal; put any hex here for a different one. */
+  --brand: #C2410C;
+
   --live: #0F766E;
   --updating: #1E5F9E;
   --waiting: #9A6408;
@@ -69,25 +73,25 @@ button { font: inherit; color: inherit; }
   font-size: 0.8125rem;
 }
 
-/* --------------------------------------------------------------- brand mark */
+/* --------------------------------------------------------------- monogram */
 
+/* EDIT HERE: the initials themselves live in index.html — two places, the top
+   bar and the setup screen. Size and colour are set here. */
 .mark {
-  position: relative;
-  width: 18px;
-  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
   flex: none;
   border: 1.5px solid var(--ink);
-  border-radius: 3px;
-}
-.mark::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  background: var(--signal);
+  border-radius: 50%;
+  color: var(--brand);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-indent: 0.04em;    /* puts the pair back on centre after tracking */
 }
 
 /* -------------------------------------------------------------------- buttons */
@@ -241,7 +245,7 @@ select.input { appearance: none; background-image: none; }
 }
 
 .setup__head { margin-bottom: 24px; }
-.setup__head .mark { width: 24px; height: 24px; margin-bottom: 16px; }
+.setup__head .mark { width: 46px; height: 46px; margin-bottom: 18px; font-size: 1.0625rem; }
 
 .setup__title {
   font-size: 1.5rem;
@@ -289,6 +293,7 @@ select.input { appearance: none; background-image: none; }
 
 .setup__actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
   padding-top: 6px;
