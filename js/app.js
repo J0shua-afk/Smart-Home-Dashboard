@@ -247,6 +247,7 @@ SHD.app = (function () {
       markers[j].classList.toggle("is-done", value < step);
     }
     document.getElementById("setup-back").hidden = step === 1;
+    document.getElementById("setup-skip").hidden = step !== 3;
     document.getElementById("setup-next").textContent = step === 3 ? "Open dashboard" : "Continue";
     setupError("");
 
@@ -255,19 +256,29 @@ SHD.app = (function () {
   }
 
   function advanceSetup() {
-    var name = document.getElementById("setup-name").value.trim();
-    var area = document.getElementById("setup-area").value.trim();
-
     if (setup.step === 1) {
-      if (!name) return setupError("Give the building a name to continue.");
+      if (!document.getElementById("setup-name").value.trim()) {
+        return setupError("Give the building a name to continue.");
+      }
       return goToStep(2);
     }
     if (setup.step === 2) {
       if (!setup.categories.length) return setupError("Pick at least one category, or add your own.");
       return goToStep(3);
     }
-    if (!area) return setupError("Name the area this sensor watches, for example Living Room.");
+    finishSetup(false);
+  }
 
+  /**
+   * Creates the building. The motion sensor is optional: skipping it, or
+   * leaving the field blank, opens a dashboard with temperature and humidity
+   * running and no areas yet.
+   */
+  function finishSetup(skipArea) {
+    var name = document.getElementById("setup-name").value.trim();
+    if (!name) { goToStep(1); return setupError("Give the building a name to continue."); }
+
+    var area = skipArea ? "" : document.getElementById("setup-area").value.trim();
     state.addBuilding({ name: name, categories: setup.categories.slice(), areaName: area });
 
     document.getElementById("setup-name").value = "";
@@ -284,6 +295,7 @@ SHD.app = (function () {
     document.getElementById("setup-back").addEventListener("click", function () {
       goToStep(Math.max(1, setup.step - 1));
     });
+    document.getElementById("setup-skip").addEventListener("click", function () { finishSetup(true); });
     document.getElementById("setup-category-add").addEventListener("click", addSetupCategory);
     document.getElementById("setup-category-new").addEventListener("keydown", function (event) {
       if (event.key === "Enter") { event.preventDefault(); addSetupCategory(); }
@@ -315,13 +327,12 @@ SHD.app = (function () {
         { type: "categories", name: "categories", value: [] },
         {
           type: "text", name: "area", label: "First area to watch", placeholder: "Front Entrance", maxLength: 40,
-          help: "You can add more areas once the building opens."
+          help: "Optional. Leave it blank and add areas once the building opens."
         }
       ],
       onSubmit: function (values) {
         if (!values.name) return "Give the building a name.";
         if (!values.categories.length) return "Pick at least one category.";
-        if (!values.area) return "Name the first area this building's motion sensor watches.";
         state.addBuilding({ name: values.name, categories: values.categories, areaName: values.area });
       }
     });
@@ -351,8 +362,10 @@ SHD.app = (function () {
 
     openModal({
       title: "Delete " + building.name + "?",
-      lede: "This removes the building and the " + building.areas.length +
-            (building.areas.length === 1 ? " area" : " areas") + " set up inside it. It cannot be undone.",
+      lede: building.areas.length
+        ? "This removes the building and the " + building.areas.length +
+          (building.areas.length === 1 ? " area" : " areas") + " set up inside it. It cannot be undone."
+        : "This removes the building and its settings. It cannot be undone.",
       submitLabel: "Delete building",
       danger: true,
       fields: building.areas.length
