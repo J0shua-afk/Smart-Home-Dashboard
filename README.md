@@ -17,8 +17,8 @@ runs and can be demonstrated with no broker at all.
 
 - **Whole-building temperature and humidity.** Both live in one panel, labelled
   as building-wide, so they are never mistaken for a room reading.
-- **Area motion sensors.** Each one names the place it watches — Living Room,
-  Garage, Front Entrance — and shows motion four ways at once: a thicker edge
+- **Area motion sensors.** Each one names the place it watches: Living Room,
+  Garage, Front Entrance. It shows motion four ways at once: a thicker edge
   marker, a filled glyph, the wording, and colour.
 - **Several buildings.** Add as many as you like, each with its own categories,
   readings and areas. Switch between them from the sidebar.
